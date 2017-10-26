@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import '../../reset.css';
 import './List.css';
 import {connect} from 'react-redux';
-import {getTasks} from '../../ducks/reducer'
+import {getTasks, deleteTask, addTask, completeTask, setTodo} from '../../ducks/reducer'
 
 
 class List extends Component{
@@ -10,24 +10,13 @@ class List extends Component{
         super(props)
         
         this.state = {
-            id: 3,
             term: '',
-            todos : [{
-                id: 1,
-                title: "React",
-                completed: false
-            },
-            {
-                id: 2,
-                title: "Other",
-                completed: false
-            }]
         }
     }
 
-    // componentDidMount(){
-    //     this.props.getTasks()
-    // }
+    componentDidMount(){
+        this.props.getTasks()
+    }
 
     handleTerm(str){
         this.setState({
@@ -36,51 +25,44 @@ class List extends Component{
     }
 
     deleteTask(i){
-        let things = this.state.todos;
-        things.splice(i,1)
-        this.setState({
-            todos: things
-        })
+        this.props.deleteTask(i);
     }
 
     addTask(){
         if(this.state.term){
-        let things = this.state.todos;
-        things.push({
-            id: this.state.id,
-            title: this.state.term,
-            completed: false
-        })
+        this.props.addTask(this.state.term)
         this.setState({
-            todos: things,
-            id: this.state.id + 1,
-            term: ''
-        })}
+            term: ""
+        })
+        }
     }
 
     completeTask(i){
-        let things = this.state.todos;
-        things[i].completed = true;
-        this.setState({
-            todos: things
-        })
+        this.props.completeTask(i);
     }
-        
 
+    setTodo(i){
+        this.props.setTodo(this.props.todos[i])
+        localStorage.setItem('todo',JSON.stringify(this.props.todos))
+    }
+    
+    
     render(){
-        
-        const todocards = this.state.todos.map( (v, i, a) => {
+        let todocards = "loading"
+        this.props.todos ? todocards = this.props.todos.map( (v, i, a) => {
             return (
-                <div className={ v.completed ? "clistitem" : "listitem"}>
-                    <h2 className="ltitle">{v.title}</h2>
+                <div key={i} className={ v.completed ? "clistitem" : "listitem"}>
+                    <a href={`/#/details/${i}`} ><h2 className="ltitle" onClick={() => {this.setTodo(i)}}>{v.title}</h2></a>
                     <div className="lleft">
-                        {v.completed ? null : <button className="lbutton" onClick={()=> this.completeTask(i)}>{v.completed ? "Completed" : "Complete?"}</button>}
-                        <button className="lx" onClick={() => this.deleteTask(i)}>X</button>
+                        {v.completed ? null : <button className="lbutton" onClick={()=> this.completeTask(v.id)}>{v.completed ? "Completed" : "Complete?"}</button>}
+                        <button className="lx" onClick={() => this.deleteTask(v.id)}>X</button>
                     </div>
                 </div>
             )
-        })
-
+        }) : "loading";
+        
+        console.log(this.props.todos);
+        
         return(
             <div className="papa">
                 <div className="header">
@@ -93,7 +75,6 @@ class List extends Component{
                 <div className="listholder">
                     {todocards}
                 </div>
-                
             </div>
         )
     }
@@ -106,4 +87,4 @@ function mapStateToProps(state){
     }
 }
 
-export default connect(mapStateToProps, {getTasks})(List)
+export default connect(mapStateToProps, {getTasks, deleteTask, addTask, completeTask, setTodo})(List)
