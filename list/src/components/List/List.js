@@ -11,7 +11,9 @@ class List extends Component{
         
         this.state = {
             term: '',
+            showtodo: false
         }
+        this.showtodo = this.showtodo.bind(this)
     }
 
     componentDidMount(){
@@ -45,6 +47,12 @@ class List extends Component{
         this.props.setTodo(this.props.todos[i])
         localStorage.setItem('todo',JSON.stringify(this.props.todos))
     }
+
+    showtodo(){
+        this.setState({
+            showtodo: !this.state.showtodo
+        })
+    }
     
     
     render(){
@@ -66,7 +74,7 @@ class List extends Component{
         return(
             <div className="papa">
                 <div className="header">
-                    <h1 className="htitle">TO-DO:</h1>
+                    <h1 className={this.state.showtodo ? "htitle" : "nohtitle"} onClick={ this.showtodo}>TO-DO:</h1>
                     <input className="hinput" value={this.state.term} style={{marginLeft: '20px'}} defaltvalue="" onChange={e => {
                                     this.handleTerm(e.target.value);
                                     }} />
